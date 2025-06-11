@@ -1,11 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navigation from '../components/Navigation';
 import SearchInput from '../components/SearchInput';
 import ResponseDisplay from '../components/ResponseDisplay';
 import ChatHistory from '../components/ChatHistory';
 import SearchHistory from '../components/SearchHistory';
-import CommonQuestions from '../components/CommonQuestions';
 import { Switch } from '../components/ui/switch';
 
 export interface ConversationItem {
@@ -33,6 +32,29 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState('');
   const [isSlackSummary, setIsSlackSummary] = useState(false);
+
+  // Load search history from localStorage on component mount
+  useEffect(() => {
+    const savedHistory = localStorage.getItem('deliverect-lens-search-history');
+    if (savedHistory) {
+      try {
+        const parsedHistory = JSON.parse(savedHistory).map((item: any) => ({
+          ...item,
+          timestamp: new Date(item.timestamp)
+        }));
+        setSearchHistory(parsedHistory);
+      } catch (error) {
+        console.error('Failed to load search history:', error);
+      }
+    }
+  }, []);
+
+  // Save search history to localStorage whenever it changes
+  useEffect(() => {
+    if (searchHistory.length > 0) {
+      localStorage.setItem('deliverect-lens-search-history', JSON.stringify(searchHistory));
+    }
+  }, [searchHistory]);
 
   const handleSearch = async (question: string) => {
     if (!question.trim()) return;
@@ -133,15 +155,6 @@ const Index = () => {
               searchHistory={searchHistory}
               onQuestionClick={handleSearch}
               isLoading={isLoading}
-            />
-          )}
-
-          {/* Common Questions - Show when no conversation history and no search history */}
-          {conversation.length === 0 && !isLoading && searchHistory.length === 0 && (
-            <CommonQuestions 
-              onQuestionClick={handleSearch}
-              isLoading={isLoading}
-              isSlackSummary={isSlackSummary}
             />
           )}
 
