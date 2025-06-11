@@ -3,37 +3,18 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import SearchInput from '../components/SearchInput';
-import ResponseDisplay from '../components/ResponseDisplay';
 import ChatHistory from '../components/ChatHistory';
 import ChatList from '../components/ChatList';
 import { Switch } from '../components/ui/switch';
+import { Chat, ConversationItem } from './Index';
 
-export interface ConversationItem {
-  id: string;
-  question: string;
-  answer: string;
-  links: Array<{
-    platform: string;
-    label: string;
-    url: string;
-  }>;
-  timestamp: Date;
-}
-
-export interface Chat {
-  id: string;
-  title: string;
-  conversations: ConversationItem[];
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const Index = () => {
+const ChatView = () => {
+  const { chatId } = useParams<{ chatId: string }>();
+  const navigate = useNavigate();
   const [chats, setChats] = useState<Chat[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState('');
   const [isSlackSummary, setIsSlackSummary] = useState(false);
-  const navigate = useNavigate();
 
   // Load chats from localStorage on component mount
   useEffect(() => {
@@ -63,35 +44,20 @@ const Index = () => {
     }
   }, [chats]);
 
-  const createNewChat = (firstQuestion?: string) => {
-    const newChatId = Date.now().toString();
-    const title = firstQuestion 
-      ? (firstQuestion.length > 50 ? firstQuestion.substring(0, 50) + '...' : firstQuestion)
-      : 'New Chat';
-    
-    const newChat: Chat = {
-      id: newChatId,
-      title,
-      conversations: [],
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
+  // Redirect if chat doesn't exist
+  useEffect(() => {
+    if (chats.length > 0 && chatId && !chats.find(chat => chat.id === chatId)) {
+      navigate('/');
+    }
+  }, [chats, chatId, navigate]);
 
-    setChats(prev => [newChat, ...prev]);
-    return newChatId;
-  };
+  const currentChat = chats.find(chat => chat.id === chatId);
 
   const handleSearch = async (question: string) => {
-    if (!question.trim()) return;
+    if (!question.trim() || !chatId) return;
     
     setCurrentQuestion(question);
     setIsLoading(true);
-    
-    // Always create a new chat for main screen searches
-    const newChatId = createNewChat(question);
-    
-    // Navigate to the new chat route
-    navigate(`/chat/${newChatId}`);
     
     // Simulate API call
     setTimeout(() => {
@@ -116,7 +82,7 @@ const Index = () => {
       };
       
       setChats(prev => prev.map(chat => 
-        chat.id === newChatId 
+        chat.id === chatId 
           ? {
               ...chat,
               conversations: [mockResponse, ...chat.conversations],
@@ -130,39 +96,53 @@ const Index = () => {
     }, 2000);
   };
 
-  const handleChatSelect = (chatId: string) => {
-    navigate(`/chat/${chatId}`);
+  const handleChatSelect = (selectedChatId: string) => {
+    navigate(`/chat/${selectedChatId}`);
   };
 
   const handleNewChat = () => {
     navigate('/');
   };
 
-  const handleDeleteChat = (chatId: string) => {
-    setChats(prev => prev.filter(chat => chat.id !== chatId));
+  const handleDeleteChat = (deleteChatId: string) => {
+    setChats(prev => prev.filter(chat => chat.id !== deleteChatId));
     
-    // If we're currently viewing the deleted chat, navigate to home
-    if (window.location.pathname === `/chat/${chatId}`) {
+    // If we're deleting the current chat, navigate to home
+    if (deleteChatId === chatId) {
       navigate('/');
     }
   };
 
+  const clearCurrentChat = () => {
+    if (chatId) {
+      setChats(prev => prev.map(chat => 
+        chat.id === chatId 
+          ? { ...chat, conversations: [] }
+          : chat
+      ));
+    }
+  };
+
+  if (!currentChat) {
+    return null; // Will redirect in useEffect
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-background to-info-50">
       <Navigation 
-        onClear={() => {}} 
-        hasConversation={false} 
+        onClear={clearCurrentChat} 
+        hasConversation={currentChat.conversations.length > 0} 
       />
       
       <main className="container mx-auto px-4 pt-8 pb-12">
         <div className="max-w-4xl mx-auto">
-          {/* Hero Section */}
+          {/* Chat Title */}
           <div className="text-center mb-8">
-            <h1 className="text-5xl font-light text-foreground mb-4 tracking-tight">
-              Deliverect Lens
+            <h1 className="text-3xl font-light text-foreground mb-2 tracking-tight">
+              {currentChat.title}
             </h1>
-            <p className="text-xl text-muted-foreground font-light max-w-2xl mx-auto">
-              Get instant insights about any customer from across Planhat, HubSpot, and Intercom
+            <p className="text-muted-foreground">
+              Continue this conversation or ask a new question
             </p>
           </div>
 
@@ -200,7 +180,7 @@ const Index = () => {
           <div className="mb-8">
             <ChatList
               chats={chats}
-              currentChatId=""
+              currentChatId={chatId || ''}
               onChatSelect={handleChatSelect}
               onNewChat={handleNewChat}
               onDeleteChat={handleDeleteChat}
@@ -230,11 +210,16 @@ const Index = () => {
             </div>
           )}
 
-          {/* Empty State */}
-          {!isLoading && (
+          {/* Chat History */}
+          {currentChat.conversations.length > 0 && (
+            <ChatHistory conversation={currentChat.conversations} />
+          )}
+
+          {/* Empty State for this chat */}
+          {currentChat.conversations.length === 0 && !isLoading && (
             <div className="text-center py-12">
               <p className="text-muted-foreground text-lg">
-                Start a new conversation or select a previous chat
+                This chat is empty. Ask a question to get started.
               </p>
             </div>
           )}
@@ -244,4 +229,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default ChatView;
