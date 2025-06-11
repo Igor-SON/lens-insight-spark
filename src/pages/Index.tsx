@@ -78,42 +78,6 @@ const Index = () => {
             </p>
           </div>
 
-          {/* Empty State - moved here below the title */}
-          {conversation.length === 0 && !isLoading && (
-            <div className="text-center py-8 mb-8">
-              <div className="w-16 h-16 bg-primary/10 rounded-full mx-auto mb-6 flex items-center justify-center">
-                <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-medium text-foreground mb-2">Start by asking a question</h3>
-              <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-                {isSlackSummary 
-                  ? "Paste a Slack URL to get a summary of the conversation and key insights"
-                  : "Try something like \"What's the ARR and support tickets for Acme Ltd?\" or \"Show me the latest deals for BigCorp\""
-                }
-              </p>
-              {!isSlackSummary && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
-                  <button 
-                    onClick={() => handleSearch("What's the current ARR and open issues for Acme Ltd?")}
-                    className="p-4 text-left bg-card/80 backdrop-blur-sm rounded-xl border border-border hover:border-primary/20 hover:bg-primary/5 transition-all duration-200"
-                  >
-                    <div className="font-medium text-foreground mb-1">Customer Health Check</div>
-                    <div className="text-sm text-muted-foreground">Get ARR, issues, and account status</div>
-                  </button>
-                  <button 
-                    onClick={() => handleSearch("Show me active deals and opportunities for BigCorp")}
-                    className="p-4 text-left bg-card/80 backdrop-blur-sm rounded-xl border border-border hover:border-primary/20 hover:bg-primary/5 transition-all duration-200"
-                  >
-                    <div className="font-medium text-foreground mb-1">Sales Pipeline</div>
-                    <div className="text-sm text-muted-foreground">View deals and opportunities</div>
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
           {/* Toggle Section - moved to top right */}
           <div className="mb-8">
             <div className="flex justify-end">
