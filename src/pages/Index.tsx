@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Navigation from '../components/Navigation';
 import SearchInput from '../components/SearchInput';
@@ -137,7 +138,12 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-background to-info-50">
+    <div 
+      className="min-h-screen bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: `url('/lovable-uploads/154c7ba5-0c82-45eb-8d9d-9c819cebf995.png')`
+      }}
+    >
       <Navigation onClear={clearConversation} hasConversation={conversation.length > 0} />
       
       <main className="container mx-auto px-4 pt-8 pb-12">
