@@ -135,14 +135,6 @@ const SearchInput = ({ onSearch, isLoading, currentQuestion, isSlackSummary }: S
             )}
           </button>
         </div>
-
-        {/* Selected Tool Indicator - Only show for Company Search */}
-        {!isSlackSummary && selectedTool !== 'all' && (
-          <div className="mt-3 text-sm text-primary flex items-center gap-2">
-            <CompanyLogo company={selectedTool} />
-            Searching in {tools.find(t => t.id === selectedTool)?.label}
-          </div>
-        )}
       </div>
 
       {/* Subtle enhancement ring on focus */}
