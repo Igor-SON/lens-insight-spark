@@ -21,6 +21,8 @@ const HelpfulLinks = ({ links }: HelpfulLinksProps) => {
         return 'bg-warning-50 text-warning-700 border-warning-200 hover:bg-warning-100';
       case 'intercom':
         return 'bg-info-50 text-info-700 border-info-200 hover:bg-info-100';
+      case 'slack':
+        return 'bg-magic-50 text-magic-700 border-magic-200 hover:bg-magic-100';
       default:
         return 'bg-muted text-muted-foreground border-border hover:bg-accent';
     }
@@ -44,6 +46,12 @@ const HelpfulLinks = ({ links }: HelpfulLinksProps) => {
         return (
           <div className="w-4 h-4 bg-info-600 rounded-sm flex items-center justify-center">
             <span className="text-white text-xs font-bold">I</span>
+          </div>
+        );
+      case 'slack':
+        return (
+          <div className="w-4 h-4 bg-magic-600 rounded-sm flex items-center justify-center">
+            <span className="text-white text-xs font-bold">S</span>
           </div>
         );
       default:

@@ -7,9 +7,39 @@ interface SearchInputProps {
   onSearch: (question: string) => void;
   isLoading: boolean;
   currentQuestion: string;
+  isSlackSummary: boolean;
 }
 
-const SearchInput = ({ onSearch, isLoading, currentQuestion }: SearchInputProps) => {
+const CompanyLogo = ({ company }: { company: string }) => {
+  const getLogoContent = () => {
+    switch (company.toLowerCase()) {
+      case 'hubspot':
+        return (
+          <div className="w-4 h-4 bg-warning-500 rounded flex items-center justify-center">
+            <span className="text-white text-xs font-bold">H</span>
+          </div>
+        );
+      case 'planhat':
+        return (
+          <div className="w-4 h-4 bg-primary-500 rounded flex items-center justify-center">
+            <span className="text-white text-xs font-bold">P</span>
+          </div>
+        );
+      case 'intercom':
+        return (
+          <div className="w-4 h-4 bg-info-500 rounded-full flex items-center justify-center">
+            <span className="text-white text-xs font-bold">I</span>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return getLogoContent();
+};
+
+const SearchInput = ({ onSearch, isLoading, currentQuestion, isSlackSummary }: SearchInputProps) => {
   const [input, setInput] = useState('');
   const [selectedTool, setSelectedTool] = useState<string>('all');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -23,7 +53,7 @@ const SearchInput = ({ onSearch, isLoading, currentQuestion }: SearchInputProps)
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim() && !isLoading) {
-      const searchQuery = selectedTool === 'all' 
+      const searchQuery = isSlackSummary || selectedTool === 'all' 
         ? input.trim() 
         : `Search in ${selectedTool}: ${input.trim()}`;
       onSearch(searchQuery);
@@ -39,36 +69,46 @@ const SearchInput = ({ onSearch, isLoading, currentQuestion }: SearchInputProps)
   };
 
   const tools = [
-    { id: 'all', label: 'All' },
-    { id: 'hubspot', label: 'HubSpot' },
-    { id: 'planhat', label: 'Planhat' },
-    { id: 'intercom', label: 'Intercom' }
+    { id: 'all', label: 'All', logo: null },
+    { id: 'hubspot', label: 'HubSpot', logo: 'hubspot' },
+    { id: 'planhat', label: 'Planhat', logo: 'planhat' },
+    { id: 'intercom', label: 'Intercom', logo: 'intercom' }
   ];
+
+  const getPlaceholder = () => {
+    if (isSlackSummary) {
+      return "Paste Slack URL here...";
+    }
+    return "Ask a question about any customer...";
+  };
 
   return (
     <form onSubmit={handleSubmit} className="relative">
-      <div className="bg-card rounded-3xl border border-border shadow-lg p-6">
-        {/* Tool Selection Section */}
-        <div className="mb-4">
-          <div className="flex items-center gap-3 mb-3">
-            <span className="text-sm font-medium text-muted-foreground">Search in:</span>
-            <div className="flex gap-2">
-              {tools.map((tool) => (
-                <Button
-                  key={tool.id}
-                  type="button"
-                  variant={selectedTool === tool.id ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedTool(tool.id)}
-                  disabled={isLoading}
-                  className="text-xs"
-                >
-                  {tool.label}
-                </Button>
-              ))}
+      <div className="bg-card/80 backdrop-blur-sm rounded-3xl border border-border shadow-lg p-6">
+        {/* Tool Selection Section - Only show for Company Search */}
+        {!isSlackSummary && (
+          <div className="mb-4">
+            <div className="flex items-center gap-3 mb-3">
+              <span className="text-sm font-medium text-muted-foreground">Search in:</span>
+              <div className="flex gap-2">
+                {tools.map((tool) => (
+                  <Button
+                    key={tool.id}
+                    type="button"
+                    variant={selectedTool === tool.id ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedTool(tool.id)}
+                    disabled={isLoading}
+                    className="text-xs flex items-center gap-2"
+                  >
+                    {tool.logo && <CompanyLogo company={tool.logo} />}
+                    {tool.label}
+                  </Button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Input Section */}
         <div className="relative group">
@@ -78,9 +118,9 @@ const SearchInput = ({ onSearch, isLoading, currentQuestion }: SearchInputProps)
             value={isLoading ? currentQuestion : input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask a question about any customer..."
+            placeholder={getPlaceholder()}
             disabled={isLoading}
-            className="w-full px-6 py-5 pr-16 text-xl bg-muted border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent focus:bg-card transition-all duration-200 disabled:bg-muted disabled:text-muted-foreground placeholder-muted-foreground"
+            className="w-full px-6 py-5 pr-16 text-xl bg-muted/50 border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent focus:bg-card transition-all duration-200 disabled:bg-muted disabled:text-muted-foreground placeholder-muted-foreground"
           />
           
           <button
@@ -96,16 +136,17 @@ const SearchInput = ({ onSearch, isLoading, currentQuestion }: SearchInputProps)
           </button>
         </div>
 
-        {/* Selected Tool Indicator */}
-        {selectedTool !== 'all' && (
-          <div className="mt-3 text-sm text-primary">
+        {/* Selected Tool Indicator - Only show for Company Search */}
+        {!isSlackSummary && selectedTool !== 'all' && (
+          <div className="mt-3 text-sm text-primary flex items-center gap-2">
+            <CompanyLogo company={selectedTool} />
             Searching in {tools.find(t => t.id === selectedTool)?.label}
           </div>
         )}
       </div>
 
       {/* Subtle enhancement ring on focus */}
-      <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-primary to-magic-500 opacity-0 group-focus-within:opacity-5 transition-opacity duration-300 pointer-events-none"></div>
+      <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-primary/20 to-magic-500/20 opacity-0 group-focus-within:opacity-10 transition-opacity duration-300 pointer-events-none"></div>
     </form>
   );
 };
