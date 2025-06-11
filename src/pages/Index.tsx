@@ -25,6 +25,7 @@ export interface SearchHistoryItem {
   firstQuestion: string;
   timestamp: Date;
   inquiryType: 'company' | 'slack';
+  conversation: ConversationItem[];
 }
 
 const Index = () => {
@@ -66,7 +67,11 @@ const Index = () => {
           title: item.title,
           firstQuestion: item.firstQuestion,
           timestamp: new Date(item.timestamp),
-          inquiryType: item.inquiryType || 'company' // Keep for backward compatibility
+          inquiryType: item.inquiryType || 'company',
+          conversation: item.conversation ? item.conversation.map((conv: any) => ({
+            ...conv,
+            timestamp: new Date(conv.timestamp)
+          })) : []
         }));
         setSearchHistory(parsedHistory);
       } catch (error) {
@@ -79,8 +84,19 @@ const Index = () => {
   useEffect(() => {
     if (conversation.length > 0) {
       localStorage.setItem('deliverect-lens-conversation', JSON.stringify(conversation));
+      
+      // Also update the current session in search history
+      setSearchHistory(prev => {
+        const updatedHistory = prev.map(item => 
+          item.id === currentSessionId 
+            ? { ...item, conversation: conversation, timestamp: new Date() }
+            : item
+        );
+        localStorage.setItem('deliverect-lens-search-history', JSON.stringify(updatedHistory));
+        return updatedHistory;
+      });
     }
-  }, [conversation]);
+  }, [conversation, currentSessionId]);
 
   // Save search history to localStorage whenever it changes
   useEffect(() => {
@@ -114,7 +130,8 @@ const Index = () => {
           title: question.length > 50 ? question.substring(0, 50) + '...' : question,
           firstQuestion: question,
           timestamp: new Date(),
-          inquiryType: isSlackSummary ? 'slack' : 'company'
+          inquiryType: isSlackSummary ? 'slack' : 'company',
+          conversation: []
         };
         return [newSession, ...prev];
       }
@@ -156,10 +173,15 @@ const Index = () => {
     setCurrentSessionId(Date.now().toString());
   };
 
-  const handleSessionClick = (sessionId: string, firstQuestion: string) => {
-    // Start a new session when clicking on a history item
-    setCurrentSessionId(Date.now().toString());
-    handleSearch(firstQuestion);
+  const handleSessionClick = (sessionId: string) => {
+    // Load the conversation from the selected session
+    const selectedSession = searchHistory.find(item => item.id === sessionId);
+    if (selectedSession && selectedSession.conversation) {
+      setConversation(selectedSession.conversation);
+      setCurrentSessionId(sessionId);
+      // Set the inquiry type based on the session
+      setIsSlackSummary(selectedSession.inquiryType === 'slack');
+    }
   };
 
   return (
