@@ -1,11 +1,11 @@
 
 import React from 'react';
 import { SearchHistoryItem } from '../pages/Index';
-import { Clock, Search } from 'lucide-react';
+import { Clock, Building2, MessageCircle } from 'lucide-react';
 
 interface SearchHistoryProps {
   searchHistory: SearchHistoryItem[];
-  onSessionClick: (sessionId: string, firstQuestion: string) => void;
+  onSessionClick: (sessionId: string) => void;
   isLoading: boolean;
 }
 
@@ -46,6 +46,14 @@ const SearchHistory = ({ searchHistory, onSessionClick, isLoading }: SearchHisto
     });
   };
 
+  const getInquiryIcon = (inquiryType: 'company' | 'slack') => {
+    return inquiryType === 'slack' ? (
+      <MessageCircle className="w-4 h-4 flex-shrink-0 text-blue-500" />
+    ) : (
+      <Building2 className="w-4 h-4 flex-shrink-0 text-green-500" />
+    );
+  };
+
   return (
     <div className="bg-card/60 backdrop-blur-sm rounded-2xl border border-border p-6">
       <div className="flex items-center space-x-3 mb-6">
@@ -59,14 +67,14 @@ const SearchHistory = ({ searchHistory, onSessionClick, isLoading }: SearchHisto
           return (
             <div key={item.id} className="group">
               <button
-                onClick={() => onSessionClick(item.id, item.firstQuestion)}
+                onClick={() => onSessionClick(item.id)}
                 disabled={isLoading}
                 className="w-full text-left p-4 rounded-xl bg-muted/30 hover:bg-muted/50 border border-transparent hover:border-border transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2 mb-2">
-                      <Search className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
+                      {getInquiryIcon(item.inquiryType)}
                       <span className="text-sm font-medium text-foreground truncate">
                         {item.title}
                       </span>

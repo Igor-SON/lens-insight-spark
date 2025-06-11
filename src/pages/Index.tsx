@@ -25,6 +25,7 @@ export interface SearchHistoryItem {
   firstQuestion: string;
   timestamp: Date;
   inquiryType: 'company' | 'slack';
+  conversation: ConversationItem[];
 }
 
 const Index = () => {
@@ -40,6 +41,22 @@ const Index = () => {
     setCurrentSessionId(Date.now().toString());
   }, []);
 
+  // Load conversation history from localStorage on component mount
+  useEffect(() => {
+    const savedConversation = localStorage.getItem('deliverect-lens-conversation');
+    if (savedConversation) {
+      try {
+        const parsedConversation = JSON.parse(savedConversation).map((item: any) => ({
+          ...item,
+          timestamp: new Date(item.timestamp)
+        }));
+        setConversation(parsedConversation);
+      } catch (error) {
+        console.error('Failed to load conversation history:', error);
+      }
+    }
+  }, []);
+
   // Load search history from localStorage on component mount
   useEffect(() => {
     const savedHistory = localStorage.getItem('deliverect-lens-search-history');
@@ -50,7 +67,11 @@ const Index = () => {
           title: item.title,
           firstQuestion: item.firstQuestion,
           timestamp: new Date(item.timestamp),
-          inquiryType: item.inquiryType || 'company' // Keep for backward compatibility
+          inquiryType: item.inquiryType || 'company',
+          conversation: item.conversation ? item.conversation.map((conv: any) => ({
+            ...conv,
+            timestamp: new Date(conv.timestamp)
+          })) : []
         }));
         setSearchHistory(parsedHistory);
       } catch (error) {
@@ -58,6 +79,24 @@ const Index = () => {
       }
     }
   }, []);
+
+  // Save conversation history to localStorage whenever it changes
+  useEffect(() => {
+    if (conversation.length > 0) {
+      localStorage.setItem('deliverect-lens-conversation', JSON.stringify(conversation));
+      
+      // Also update the current session in search history
+      setSearchHistory(prev => {
+        const updatedHistory = prev.map(item => 
+          item.id === currentSessionId 
+            ? { ...item, conversation: conversation, timestamp: new Date() }
+            : item
+        );
+        localStorage.setItem('deliverect-lens-search-history', JSON.stringify(updatedHistory));
+        return updatedHistory;
+      });
+    }
+  }, [conversation, currentSessionId]);
 
   // Save search history to localStorage whenever it changes
   useEffect(() => {
@@ -91,7 +130,8 @@ const Index = () => {
           title: question.length > 50 ? question.substring(0, 50) + '...' : question,
           firstQuestion: question,
           timestamp: new Date(),
-          inquiryType: isSlackSummary ? 'slack' : 'company'
+          inquiryType: isSlackSummary ? 'slack' : 'company',
+          conversation: []
         };
         return [newSession, ...prev];
       }
@@ -127,23 +167,25 @@ const Index = () => {
 
   const clearConversation = () => {
     setConversation([]);
+    // Clear conversation from localStorage
+    localStorage.removeItem('deliverect-lens-conversation');
     // Start a new session when clearing conversation
     setCurrentSessionId(Date.now().toString());
   };
 
-  const handleSessionClick = (sessionId: string, firstQuestion: string) => {
-    // Start a new session when clicking on a history item
-    setCurrentSessionId(Date.now().toString());
-    handleSearch(firstQuestion);
+  const handleSessionClick = (sessionId: string) => {
+    // Load the conversation from the selected session
+    const selectedSession = searchHistory.find(item => item.id === sessionId);
+    if (selectedSession && selectedSession.conversation) {
+      setConversation(selectedSession.conversation);
+      setCurrentSessionId(sessionId);
+      // Set the inquiry type based on the session
+      setIsSlackSummary(selectedSession.inquiryType === 'slack');
+    }
   };
 
   return (
-    <div 
-      className="min-h-screen bg-cover bg-center bg-no-repeat"
-      style={{
-        backgroundImage: `url('/lovable-uploads/154c7ba5-0c82-45eb-8d9d-9c819cebf995.png')`
-      }}
-    >
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-background to-info-50">
       <Navigation onClear={clearConversation} hasConversation={conversation.length > 0} />
       
       <main className="container mx-auto px-4 pt-8 pb-12">
