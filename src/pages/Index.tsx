@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import Navigation from '../components/Navigation';
 import SearchInput from '../components/SearchInput';
 import ResponseDisplay from '../components/ResponseDisplay';
 import ChatHistory from '../components/ChatHistory';
+import SearchHistory from '../components/SearchHistory';
 import CommonQuestions from '../components/CommonQuestions';
 import { Switch } from '../components/ui/switch';
 
@@ -109,12 +109,12 @@ const Index = () => {
             />
           </div>
 
-          {/* Common Questions - Only show when no conversation history */}
+          {/* Search History - Only show when no conversation history */}
           {conversation.length === 0 && !isLoading && (
-            <CommonQuestions 
+            <SearchHistory 
+              conversation={conversation}
               onQuestionClick={handleSearch}
               isLoading={isLoading}
-              isSlackSummary={isSlackSummary}
             />
           )}
 
