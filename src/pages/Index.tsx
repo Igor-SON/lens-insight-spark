@@ -1,12 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import SearchInput from '../components/SearchInput';
-import ResponseDisplay from '../components/ResponseDisplay';
-import ChatHistory from '../components/ChatHistory';
 import ChatList from '../components/ChatList';
-import { Switch } from '../components/ui/switch';
+import CommonQuestions from '../components/CommonQuestions';
+import HeroSection from '../components/HeroSection';
+import SearchToggle from '../components/SearchToggle';
+import LoadingResponse from '../components/LoadingResponse';
+import EmptyState from '../components/EmptyState';
 
 export interface ConversationItem {
   id: string;
@@ -156,88 +158,39 @@ const Index = () => {
       
       <main className="container mx-auto px-4 pt-8 pb-12">
         <div className="max-w-4xl mx-auto">
-          {/* Hero Section */}
-          <div className="text-center mb-8">
-            <h1 className="text-5xl font-light text-foreground mb-4 tracking-tight">
-              Deliverect Lens
-            </h1>
-            <p className="text-xl text-muted-foreground font-light max-w-2xl mx-auto">
-              Get instant insights about any customer from across Planhat, HubSpot, and Intercom
-            </p>
-          </div>
+          <HeroSection />
+          
+          <SearchToggle 
+            isSlackSummary={isSlackSummary}
+            onToggle={setIsSlackSummary}
+          />
 
-          {/* Toggle Section */}
-          <div className="mb-8">
-            <div className="flex justify-end">
-              <div className="bg-card/80 backdrop-blur-sm rounded-2xl border border-border shadow-sm p-4">
-                <div className="flex items-center space-x-4">
-                  <span className={`text-sm font-medium transition-colors ${!isSlackSummary ? 'text-foreground' : 'text-muted-foreground'}`}>
-                    Company Search
-                  </span>
-                  <Switch
-                    checked={isSlackSummary}
-                    onCheckedChange={setIsSlackSummary}
-                  />
-                  <span className={`text-sm font-medium transition-colors ${isSlackSummary ? 'text-foreground' : 'text-muted-foreground'}`}>
-                    Slack Summary
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <SearchInput 
+            onSearch={handleSearch} 
+            isLoading={isLoading}
+            currentQuestion={currentQuestion}
+            isSlackSummary={isSlackSummary}
+          />
 
-          {/* Search Input */}
-          <div className="mb-8">
-            <SearchInput 
-              onSearch={handleSearch} 
-              isLoading={isLoading}
-              currentQuestion={currentQuestion}
-              isSlackSummary={isSlackSummary}
-            />
-          </div>
+          <CommonQuestions 
+            onQuestionClick={handleSearch}
+            isLoading={isLoading}
+            isSlackSummary={isSlackSummary}
+          />
 
-          {/* Chat List */}
-          <div className="mb-8">
-            <ChatList
-              chats={chats}
-              currentChatId=""
-              onChatSelect={handleChatSelect}
-              onNewChat={handleNewChat}
-              onDeleteChat={handleDeleteChat}
-            />
-          </div>
+          <ChatList
+            chats={chats}
+            currentChatId=""
+            onChatSelect={handleChatSelect}
+            onNewChat={handleNewChat}
+            onDeleteChat={handleDeleteChat}
+          />
 
-          {/* Current Response Loading */}
           {isLoading && (
-            <div className="mb-8">
-              <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-8 shadow-sm border border-border">
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-                  </div>
-                  <span className="text-muted-foreground font-medium">
-                    {isSlackSummary ? 'Analyzing Slack conversation...' : 'Analyzing customer data...'}
-                  </span>
-                </div>
-                <div className="space-y-3">
-                  <div className="h-4 bg-muted rounded animate-pulse"></div>
-                  <div className="h-4 bg-muted rounded animate-pulse w-5/6"></div>
-                  <div className="h-4 bg-muted rounded animate-pulse w-4/6"></div>
-                </div>
-              </div>
-            </div>
+            <LoadingResponse isSlackSummary={isSlackSummary} />
           )}
 
-          {/* Empty State */}
-          {!isLoading && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground text-lg">
-                Start a new conversation or select a previous chat
-              </p>
-            </div>
-          )}
+          {!isLoading && <EmptyState />}
         </div>
       </main>
     </div>
