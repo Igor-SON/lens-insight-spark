@@ -16,17 +16,17 @@ const Navigation = ({ onClear, hasConversation }: NavigationProps) => {
   };
 
   return (
-    <nav className="border-b border-gray-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+    <nav className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo/Brand */}
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-primary-foreground" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <span className="text-xl font-semibold text-gray-900 tracking-tight">
+            <span className="text-xl font-semibold text-foreground tracking-tight">
               Deliverect Lens
             </span>
           </div>
@@ -37,7 +37,7 @@ const Navigation = ({ onClear, hasConversation }: NavigationProps) => {
             {hasConversation && (
               <button
                 onClick={onClear}
-                className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                className="flex items-center space-x-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors duration-200"
               >
                 <RefreshCw className="w-4 h-4" />
                 <span>New Search</span>
@@ -47,7 +47,7 @@ const Navigation = ({ onClear, hasConversation }: NavigationProps) => {
             {/* Dark Mode Toggle */}
             <button
               onClick={toggleDarkMode}
-              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+              className="p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors duration-200"
               title="Toggle dark mode"
             >
               {isDarkMode ? (
@@ -62,8 +62,8 @@ const Navigation = ({ onClear, hasConversation }: NavigationProps) => {
             </button>
 
             {/* User Profile */}
-            <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-              <span className="text-sm font-medium text-gray-700">CS</span>
+            <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+              <span className="text-sm font-medium text-muted-foreground">CS</span>
             </div>
           </div>
         </div>

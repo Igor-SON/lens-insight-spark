@@ -28,14 +28,14 @@ const ResponseDisplay = ({ item, isLatest = false }: ResponseDisplayProps) => {
   };
 
   return (
-    <div className={`bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden ${isLatest ? 'ring-1 ring-blue-100' : ''}`}>
+    <div className={`bg-card rounded-2xl shadow-sm border border-border overflow-hidden ${isLatest ? 'ring-1 ring-primary/20' : ''}`}>
       {/* Question */}
-      <div className="px-8 pt-6 pb-4 border-b border-gray-50">
+      <div className="px-8 pt-6 pb-4 border-b border-border">
         <div className="flex items-start justify-between">
-          <h3 className="text-lg font-medium text-gray-900 leading-relaxed">
+          <h3 className="text-lg font-medium text-foreground leading-relaxed">
             {item.question}
           </h3>
-          <span className="text-sm text-gray-400 ml-4 flex-shrink-0">
+          <span className="text-sm text-muted-foreground ml-4 flex-shrink-0">
             {formatTime(item.timestamp)}
           </span>
         </div>
@@ -45,17 +45,17 @@ const ResponseDisplay = ({ item, isLatest = false }: ResponseDisplayProps) => {
       <div className="px-8 py-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center space-x-2">
-            <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-              <svg className="w-3.5 h-3.5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+            <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
+              <svg className="w-3.5 h-3.5 text-primary" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <span className="text-sm font-medium text-gray-700">Analysis</span>
+            <span className="text-sm font-medium text-foreground">Analysis</span>
           </div>
           
           <button
             onClick={handleCopy}
-            className="flex items-center space-x-1 px-2 py-1 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors duration-200"
+            className="flex items-center space-x-1 px-2 py-1 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors duration-200"
           >
             {copied ? (
               <>
@@ -72,7 +72,7 @@ const ResponseDisplay = ({ item, isLatest = false }: ResponseDisplayProps) => {
         </div>
 
         <div className="prose prose-gray max-w-none">
-          <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+          <p className="text-foreground leading-relaxed whitespace-pre-line">
             {item.answer}
           </p>
         </div>
