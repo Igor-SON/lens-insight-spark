@@ -4,7 +4,7 @@ import Navigation from '../components/Navigation';
 import SearchInput from '../components/SearchInput';
 import ResponseDisplay from '../components/ResponseDisplay';
 import ChatHistory from '../components/ChatHistory';
-import SearchHistory from '../components/SearchHistory';
+import ChatList from '../components/ChatList';
 import { Switch } from '../components/ui/switch';
 
 export interface ConversationItem {
@@ -19,49 +19,71 @@ export interface ConversationItem {
   timestamp: Date;
 }
 
-export interface SearchHistoryItem {
+export interface Chat {
   id: string;
   title: string;
-  firstQuestion: string;
-  questionCount: number;
-  timestamp: Date;
+  conversations: ConversationItem[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const Index = () => {
-  const [conversation, setConversation] = useState<ConversationItem[]>([]);
-  const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>([]);
-  const [currentSessionId, setCurrentSessionId] = useState<string>('');
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [currentChatId, setCurrentChatId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState('');
   const [isSlackSummary, setIsSlackSummary] = useState(false);
 
-  // Initialize a new session on component mount
+  // Load chats from localStorage on component mount
   useEffect(() => {
-    setCurrentSessionId(Date.now().toString());
-  }, []);
-
-  // Load search history from localStorage on component mount
-  useEffect(() => {
-    const savedHistory = localStorage.getItem('deliverect-lens-search-history');
-    if (savedHistory) {
+    const savedChats = localStorage.getItem('deliverect-lens-chats');
+    if (savedChats) {
       try {
-        const parsedHistory = JSON.parse(savedHistory).map((item: any) => ({
-          ...item,
-          timestamp: new Date(item.timestamp)
+        const parsedChats = JSON.parse(savedChats).map((chat: any) => ({
+          ...chat,
+          createdAt: new Date(chat.createdAt),
+          updatedAt: new Date(chat.updatedAt),
+          conversations: chat.conversations.map((conv: any) => ({
+            ...conv,
+            timestamp: new Date(conv.timestamp)
+          }))
         }));
-        setSearchHistory(parsedHistory);
+        setChats(parsedChats);
       } catch (error) {
-        console.error('Failed to load search history:', error);
+        console.error('Failed to load chats:', error);
       }
     }
   }, []);
 
-  // Save search history to localStorage whenever it changes
+  // Save chats to localStorage whenever chats change
   useEffect(() => {
-    if (searchHistory.length > 0) {
-      localStorage.setItem('deliverect-lens-search-history', JSON.stringify(searchHistory));
+    if (chats.length > 0) {
+      localStorage.setItem('deliverect-lens-chats', JSON.stringify(chats));
     }
-  }, [searchHistory]);
+  }, [chats]);
+
+  const createNewChat = (firstQuestion?: string) => {
+    const newChatId = Date.now().toString();
+    const title = firstQuestion 
+      ? (firstQuestion.length > 50 ? firstQuestion.substring(0, 50) + '...' : firstQuestion)
+      : 'New Chat';
+    
+    const newChat: Chat = {
+      id: newChatId,
+      title,
+      conversations: [],
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    setChats(prev => [newChat, ...prev]);
+    setCurrentChatId(newChatId);
+    return newChatId;
+  };
+
+  const getCurrentChat = () => {
+    return chats.find(chat => chat.id === currentChatId);
+  };
 
   const handleSearch = async (question: string) => {
     if (!question.trim()) return;
@@ -69,31 +91,12 @@ const Index = () => {
     setCurrentQuestion(question);
     setIsLoading(true);
     
-    // Update or create search history session
-    setSearchHistory(prev => {
-      const existingSessionIndex = prev.findIndex(item => item.id === currentSessionId);
-      
-      if (existingSessionIndex >= 0) {
-        // Update existing session
-        const updatedHistory = [...prev];
-        updatedHistory[existingSessionIndex] = {
-          ...updatedHistory[existingSessionIndex],
-          questionCount: updatedHistory[existingSessionIndex].questionCount + 1,
-          timestamp: new Date() // Update timestamp to latest question
-        };
-        return updatedHistory;
-      } else {
-        // Create new session
-        const newSession: SearchHistoryItem = {
-          id: currentSessionId,
-          title: question.length > 50 ? question.substring(0, 50) + '...' : question,
-          firstQuestion: question,
-          questionCount: 1,
-          timestamp: new Date()
-        };
-        return [newSession, ...prev];
-      }
-    });
+    let chatId = currentChatId;
+    
+    // Create new chat if none exists or if current chat doesn't exist
+    if (!chatId || !chats.find(chat => chat.id === chatId)) {
+      chatId = createNewChat(question);
+    }
     
     // Simulate API call
     setTimeout(() => {
@@ -117,106 +120,142 @@ const Index = () => {
         timestamp: new Date()
       };
       
-      setConversation(prev => [mockResponse, ...prev]);
+      setChats(prev => prev.map(chat => 
+        chat.id === chatId 
+          ? {
+              ...chat,
+              conversations: [mockResponse, ...chat.conversations],
+              updatedAt: new Date()
+            }
+          : chat
+      ));
+      
       setIsLoading(false);
       setCurrentQuestion('');
     }, 2000);
   };
 
-  const clearConversation = () => {
-    setConversation([]);
-    // Start a new session when clearing conversation
-    setCurrentSessionId(Date.now().toString());
+  const handleChatSelect = (chatId: string) => {
+    setCurrentChatId(chatId);
   };
 
-  const handleSessionClick = (sessionId: string, firstQuestion: string) => {
-    // Start a new session when clicking on a history item
-    setCurrentSessionId(Date.now().toString());
-    handleSearch(firstQuestion);
+  const handleNewChat = () => {
+    const newChatId = createNewChat();
+    setCurrentChatId(newChatId);
   };
+
+  const clearCurrentChat = () => {
+    if (currentChatId) {
+      setChats(prev => prev.map(chat => 
+        chat.id === currentChatId 
+          ? { ...chat, conversations: [] }
+          : chat
+      ));
+    }
+  };
+
+  const currentChat = getCurrentChat();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-background to-info-50">
-      <Navigation onClear={clearConversation} hasConversation={conversation.length > 0} />
+      <Navigation 
+        onClear={clearCurrentChat} 
+        hasConversation={currentChat?.conversations.length > 0} 
+      />
       
       <main className="container mx-auto px-4 pt-8 pb-12">
-        <div className="max-w-4xl mx-auto">
-          {/* Hero Section */}
-          <div className="text-center mb-8">
-            <h1 className="text-5xl font-light text-foreground mb-4 tracking-tight">
-              Deliverect Lens
-            </h1>
-            <p className="text-xl text-muted-foreground font-light max-w-2xl mx-auto">
-              Get instant insights about any customer from across Planhat, HubSpot, and Intercom
-            </p>
-          </div>
-
-          {/* Toggle Section - moved to top right */}
-          <div className="mb-8">
-            <div className="flex justify-end">
-              <div className="bg-card/80 backdrop-blur-sm rounded-2xl border border-border shadow-sm p-4">
-                <div className="flex items-center space-x-4">
-                  <span className={`text-sm font-medium transition-colors ${!isSlackSummary ? 'text-foreground' : 'text-muted-foreground'}`}>
-                    Company Search
-                  </span>
-                  <Switch
-                    checked={isSlackSummary}
-                    onCheckedChange={setIsSlackSummary}
-                  />
-                  <span className={`text-sm font-medium transition-colors ${isSlackSummary ? 'text-foreground' : 'text-muted-foreground'}`}>
-                    Slack Summary
-                  </span>
-                </div>
-              </div>
+        <div className="max-w-6xl mx-auto">
+          <div className="flex gap-6">
+            {/* Chat List Sidebar */}
+            <div className="w-80 flex-shrink-0">
+              <ChatList
+                chats={chats}
+                currentChatId={currentChatId}
+                onChatSelect={handleChatSelect}
+                onNewChat={handleNewChat}
+              />
             </div>
-          </div>
 
-          {/* Search Input */}
-          <div className="mb-8">
-            <SearchInput 
-              onSearch={handleSearch} 
-              isLoading={isLoading}
-              currentQuestion={currentQuestion}
-              isSlackSummary={isSlackSummary}
-            />
-          </div>
+            {/* Main Content */}
+            <div className="flex-1 min-w-0">
+              {/* Hero Section */}
+              <div className="text-center mb-8">
+                <h1 className="text-5xl font-light text-foreground mb-4 tracking-tight">
+                  Deliverect Lens
+                </h1>
+                <p className="text-xl text-muted-foreground font-light max-w-2xl mx-auto">
+                  Get instant insights about any customer from across Planhat, HubSpot, and Intercom
+                </p>
+              </div>
 
-          {/* Search History - Show when no conversation history and has search history */}
-          {conversation.length === 0 && !isLoading && searchHistory.length > 0 && (
-            <SearchHistory 
-              searchHistory={searchHistory}
-              onSessionClick={handleSessionClick}
-              isLoading={isLoading}
-            />
-          )}
-
-          {/* Current Response */}
-          {isLoading && (
-            <div className="mb-8">
-              <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-8 shadow-sm border border-border">
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+              {/* Toggle Section */}
+              <div className="mb-8">
+                <div className="flex justify-end">
+                  <div className="bg-card/80 backdrop-blur-sm rounded-2xl border border-border shadow-sm p-4">
+                    <div className="flex items-center space-x-4">
+                      <span className={`text-sm font-medium transition-colors ${!isSlackSummary ? 'text-foreground' : 'text-muted-foreground'}`}>
+                        Company Search
+                      </span>
+                      <Switch
+                        checked={isSlackSummary}
+                        onCheckedChange={setIsSlackSummary}
+                      />
+                      <span className={`text-sm font-medium transition-colors ${isSlackSummary ? 'text-foreground' : 'text-muted-foreground'}`}>
+                        Slack Summary
+                      </span>
+                    </div>
                   </div>
-                  <span className="text-muted-foreground font-medium">
-                    {isSlackSummary ? 'Analyzing Slack conversation...' : 'Analyzing customer data...'}
-                  </span>
-                </div>
-                <div className="space-y-3">
-                  <div className="h-4 bg-muted rounded animate-pulse"></div>
-                  <div className="h-4 bg-muted rounded animate-pulse w-5/6"></div>
-                  <div className="h-4 bg-muted rounded animate-pulse w-4/6"></div>
                 </div>
               </div>
-            </div>
-          )}
 
-          {/* Conversation History */}
-          {conversation.length > 0 && (
-            <ChatHistory conversation={conversation} />
-          )}
+              {/* Search Input */}
+              <div className="mb-8">
+                <SearchInput 
+                  onSearch={handleSearch} 
+                  isLoading={isLoading}
+                  currentQuestion={currentQuestion}
+                  isSlackSummary={isSlackSummary}
+                />
+              </div>
+
+              {/* Current Response Loading */}
+              {isLoading && (
+                <div className="mb-8">
+                  <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-8 shadow-sm border border-border">
+                    <div className="flex items-center space-x-3 mb-6">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                        <div className="w-2 h-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-2 h-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                      </div>
+                      <span className="text-muted-foreground font-medium">
+                        {isSlackSummary ? 'Analyzing Slack conversation...' : 'Analyzing customer data...'}
+                      </span>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="h-4 bg-muted rounded animate-pulse"></div>
+                      <div className="h-4 bg-muted rounded animate-pulse w-5/6"></div>
+                      <div className="h-4 bg-muted rounded animate-pulse w-4/6"></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Chat History */}
+              {currentChat && currentChat.conversations.length > 0 && (
+                <ChatHistory conversation={currentChat.conversations} />
+              )}
+
+              {/* Empty State */}
+              {!currentChat && !isLoading && (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground text-lg">
+                    Select a chat from the sidebar or start a new conversation
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </main>
     </div>
