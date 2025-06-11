@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Navigation from '../components/Navigation';
 import SearchInput from '../components/SearchInput';
@@ -39,6 +40,22 @@ const Index = () => {
     setCurrentSessionId(Date.now().toString());
   }, []);
 
+  // Load conversation history from localStorage on component mount
+  useEffect(() => {
+    const savedConversation = localStorage.getItem('deliverect-lens-conversation');
+    if (savedConversation) {
+      try {
+        const parsedConversation = JSON.parse(savedConversation).map((item: any) => ({
+          ...item,
+          timestamp: new Date(item.timestamp)
+        }));
+        setConversation(parsedConversation);
+      } catch (error) {
+        console.error('Failed to load conversation history:', error);
+      }
+    }
+  }, []);
+
   // Load search history from localStorage on component mount
   useEffect(() => {
     const savedHistory = localStorage.getItem('deliverect-lens-search-history');
@@ -57,6 +74,13 @@ const Index = () => {
       }
     }
   }, []);
+
+  // Save conversation history to localStorage whenever it changes
+  useEffect(() => {
+    if (conversation.length > 0) {
+      localStorage.setItem('deliverect-lens-conversation', JSON.stringify(conversation));
+    }
+  }, [conversation]);
 
   // Save search history to localStorage whenever it changes
   useEffect(() => {
@@ -126,6 +150,8 @@ const Index = () => {
 
   const clearConversation = () => {
     setConversation([]);
+    // Clear conversation from localStorage
+    localStorage.removeItem('deliverect-lens-conversation');
     // Start a new session when clearing conversation
     setCurrentSessionId(Date.now().toString());
   };
