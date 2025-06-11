@@ -1,15 +1,15 @@
 
 import React from 'react';
 import { SearchHistoryItem } from '../pages/Index';
-import { Clock, Search } from 'lucide-react';
+import { Clock, Search, MessageSquare } from 'lucide-react';
 
 interface SearchHistoryProps {
   searchHistory: SearchHistoryItem[];
-  onQuestionClick: (question: string) => void;
+  onSessionClick: (sessionId: string, firstQuestion: string) => void;
   isLoading: boolean;
 }
 
-const SearchHistory = ({ searchHistory, onQuestionClick, isLoading }: SearchHistoryProps) => {
+const SearchHistory = ({ searchHistory, onSessionClick, isLoading }: SearchHistoryProps) => {
   const formatDateTime = (date: Date) => {
     const now = new Date();
     const diff = now.getTime() - date.getTime();
@@ -44,14 +44,14 @@ const SearchHistory = ({ searchHistory, onQuestionClick, isLoading }: SearchHist
       <div className="flex items-center space-x-3 mb-6">
         <Clock className="w-5 h-5 text-muted-foreground" />
         <h3 className="text-lg font-semibold text-foreground">Search History</h3>
-        <span className="text-sm text-muted-foreground">({searchHistory.length})</span>
+        <span className="text-sm text-muted-foreground">({searchHistory.length} sessions)</span>
       </div>
 
       <div className="space-y-3">
         {searchHistory.map((item) => (
           <div key={item.id} className="group">
             <button
-              onClick={() => onQuestionClick(item.question)}
+              onClick={() => onSessionClick(item.id, item.firstQuestion)}
               disabled={isLoading}
               className="w-full text-left p-4 rounded-xl bg-muted/30 hover:bg-muted/50 border border-transparent hover:border-border transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -63,11 +63,17 @@ const SearchHistory = ({ searchHistory, onQuestionClick, isLoading }: SearchHist
                       {item.title}
                     </span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Clock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                    <span className="text-xs text-muted-foreground">
-                      {formatDateTime(item.timestamp)}
-                    </span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Clock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                      <span className="text-xs text-muted-foreground">
+                        {formatDateTime(item.timestamp)}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-1 text-xs text-muted-foreground">
+                      <MessageSquare className="w-3 h-3" />
+                      <span>{item.questionCount} question{item.questionCount !== 1 ? 's' : ''}</span>
+                    </div>
                   </div>
                 </div>
               </div>

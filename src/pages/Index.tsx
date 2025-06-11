@@ -22,16 +22,23 @@ export interface ConversationItem {
 export interface SearchHistoryItem {
   id: string;
   title: string;
-  question: string;
+  firstQuestion: string;
+  questionCount: number;
   timestamp: Date;
 }
 
 const Index = () => {
   const [conversation, setConversation] = useState<ConversationItem[]>([]);
   const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>([]);
+  const [currentSessionId, setCurrentSessionId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState('');
   const [isSlackSummary, setIsSlackSummary] = useState(false);
+
+  // Initialize a new session on component mount
+  useEffect(() => {
+    setCurrentSessionId(Date.now().toString());
+  }, []);
 
   // Load search history from localStorage on component mount
   useEffect(() => {
@@ -62,14 +69,31 @@ const Index = () => {
     setCurrentQuestion(question);
     setIsLoading(true);
     
-    // Add to search history
-    const searchHistoryItem: SearchHistoryItem = {
-      id: Date.now().toString(),
-      title: question.length > 50 ? question.substring(0, 50) + '...' : question,
-      question,
-      timestamp: new Date()
-    };
-    setSearchHistory(prev => [searchHistoryItem, ...prev]);
+    // Update or create search history session
+    setSearchHistory(prev => {
+      const existingSessionIndex = prev.findIndex(item => item.id === currentSessionId);
+      
+      if (existingSessionIndex >= 0) {
+        // Update existing session
+        const updatedHistory = [...prev];
+        updatedHistory[existingSessionIndex] = {
+          ...updatedHistory[existingSessionIndex],
+          questionCount: updatedHistory[existingSessionIndex].questionCount + 1,
+          timestamp: new Date() // Update timestamp to latest question
+        };
+        return updatedHistory;
+      } else {
+        // Create new session
+        const newSession: SearchHistoryItem = {
+          id: currentSessionId,
+          title: question.length > 50 ? question.substring(0, 50) + '...' : question,
+          firstQuestion: question,
+          questionCount: 1,
+          timestamp: new Date()
+        };
+        return [newSession, ...prev];
+      }
+    });
     
     // Simulate API call
     setTimeout(() => {
@@ -101,6 +125,14 @@ const Index = () => {
 
   const clearConversation = () => {
     setConversation([]);
+    // Start a new session when clearing conversation
+    setCurrentSessionId(Date.now().toString());
+  };
+
+  const handleSessionClick = (sessionId: string, firstQuestion: string) => {
+    // Start a new session when clicking on a history item
+    setCurrentSessionId(Date.now().toString());
+    handleSearch(firstQuestion);
   };
 
   return (
@@ -153,7 +185,7 @@ const Index = () => {
           {conversation.length === 0 && !isLoading && searchHistory.length > 0 && (
             <SearchHistory 
               searchHistory={searchHistory}
-              onQuestionClick={handleSearch}
+              onSessionClick={handleSessionClick}
               isLoading={isLoading}
             />
           )}
