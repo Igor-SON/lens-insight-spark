@@ -23,6 +23,8 @@ const HelpfulLinks = ({ links }: HelpfulLinksProps) => {
         return 'bg-info-50 text-info-700 border-info-200 hover:bg-info-100';
       case 'slack':
         return 'bg-magic-50 text-magic-700 border-magic-200 hover:bg-magic-100';
+      case 'deliverect':
+        return 'bg-success-50 text-success-700 border-success-200 hover:bg-success-100';
       default:
         return 'bg-muted text-muted-foreground border-border hover:bg-accent';
     }
@@ -32,27 +34,27 @@ const HelpfulLinks = ({ links }: HelpfulLinksProps) => {
     switch (platform.toLowerCase()) {
       case 'planhat':
         return (
-          <div className="w-6 h-6 bg-primary-600 rounded flex items-center justify-center">
-            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white">
-              <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z"/>
-            </svg>
-          </div>
+          <img 
+            src="/lovable-uploads/6fef8606-a379-4528-a82c-a018de934826.png" 
+            alt="Planhat logo" 
+            className="w-6 h-6 object-contain"
+          />
         );
       case 'hubspot':
         return (
-          <div className="w-6 h-6 bg-warning-600 rounded flex items-center justify-center">
-            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-            </svg>
-          </div>
+          <img 
+            src="/lovable-uploads/87ba1526-c176-405a-a871-e5c62021247f.png" 
+            alt="HubSpot logo" 
+            className="w-6 h-6 object-contain"
+          />
         );
       case 'intercom':
         return (
-          <div className="w-6 h-6 bg-info-600 rounded flex items-center justify-center">
-            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
-            </svg>
-          </div>
+          <img 
+            src="/lovable-uploads/9551c668-f10b-44a9-80cd-2e37f653b61f.png" 
+            alt="Intercom logo" 
+            className="w-6 h-6 object-contain"
+          />
         );
       case 'slack':
         return (
@@ -64,6 +66,14 @@ const HelpfulLinks = ({ links }: HelpfulLinksProps) => {
               <path d="M12.61 15.79c1.17 0 2.13.95 2.13 2.12s-.96 2.13-2.13 2.13-2.12-.95-2.12-2.13v-2.12h2.12zm0-1.06c-1.17 0-2.12-.95-2.12-2.12s.95-2.13 2.12-2.13h5.32c1.17 0 2.13.96 2.13 2.13s-.96 2.12-2.13 2.12h-5.32z"/>
             </svg>
           </div>
+        );
+      case 'deliverect':
+        return (
+          <img 
+            src="/lovable-uploads/2601ab1f-7341-4e97-8155-743d52b22961.png" 
+            alt="Deliverect logo" 
+            className="w-6 h-6 object-contain"
+          />
         );
       default:
         return <ExternalLink className="w-6 h-6" />;
