@@ -15,21 +15,27 @@ const CompanyLogo = ({ company }: { company: string }) => {
     switch (company.toLowerCase()) {
       case 'hubspot':
         return (
-          <div className="w-4 h-4 bg-warning-500 rounded flex items-center justify-center">
-            <span className="text-white text-xs font-bold">H</span>
-          </div>
+          <img 
+            src="/lovable-uploads/c7eb2c01-09ab-4281-a17a-a00179b49c88.png" 
+            alt="HubSpot" 
+            className="w-4 h-4"
+          />
         );
       case 'planhat':
         return (
-          <div className="w-4 h-4 bg-primary-500 rounded flex items-center justify-center">
-            <span className="text-white text-xs font-bold">P</span>
-          </div>
+          <img 
+            src="/lovable-uploads/830e22fb-4a1e-4151-a579-5d61cf3d93a7.png" 
+            alt="Planhat" 
+            className="w-4 h-4"
+          />
         );
       case 'intercom':
         return (
-          <div className="w-4 h-4 bg-info-500 rounded-full flex items-center justify-center">
-            <span className="text-white text-xs font-bold">I</span>
-          </div>
+          <img 
+            src="/lovable-uploads/22259bae-b393-4186-811c-0c849a571d53.png" 
+            alt="Intercom" 
+            className="w-4 h-4"
+          />
         );
       default:
         return null;
