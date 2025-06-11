@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Navigation from '../components/Navigation';
 import SearchInput from '../components/SearchInput';
@@ -23,7 +22,6 @@ export interface SearchHistoryItem {
   id: string;
   title: string;
   firstQuestion: string;
-  questionCount: number;
   timestamp: Date;
   inquiryType: 'company' | 'slack';
 }
@@ -47,9 +45,11 @@ const Index = () => {
     if (savedHistory) {
       try {
         const parsedHistory = JSON.parse(savedHistory).map((item: any) => ({
-          ...item,
+          id: item.id,
+          title: item.title,
+          firstQuestion: item.firstQuestion,
           timestamp: new Date(item.timestamp),
-          inquiryType: item.inquiryType || 'company' // Default to company for backward compatibility
+          inquiryType: item.inquiryType || 'company' // Keep for backward compatibility
         }));
         setSearchHistory(parsedHistory);
       } catch (error) {
@@ -76,11 +76,10 @@ const Index = () => {
       const existingSessionIndex = prev.findIndex(item => item.id === currentSessionId);
       
       if (existingSessionIndex >= 0) {
-        // Update existing session
+        // Update existing session timestamp
         const updatedHistory = [...prev];
         updatedHistory[existingSessionIndex] = {
           ...updatedHistory[existingSessionIndex],
-          questionCount: updatedHistory[existingSessionIndex].questionCount + 1,
           timestamp: new Date() // Update timestamp to latest question
         };
         return updatedHistory;
@@ -90,7 +89,6 @@ const Index = () => {
           id: currentSessionId,
           title: question.length > 50 ? question.substring(0, 50) + '...' : question,
           firstQuestion: question,
-          questionCount: 1,
           timestamp: new Date(),
           inquiryType: isSlackSummary ? 'slack' : 'company'
         };

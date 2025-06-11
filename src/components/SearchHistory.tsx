@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { SearchHistoryItem } from '../pages/Index';
-import { Clock, Search, MessageSquare, Building2, MessageCircle } from 'lucide-react';
+import { Clock, Search } from 'lucide-react';
 
 interface SearchHistoryProps {
   searchHistory: SearchHistoryItem[];
@@ -17,38 +17,33 @@ const SearchHistory = ({ searchHistory, onSessionClick, isLoading }: SearchHisto
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-    const timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    
     if (minutes < 1) {
-      return `Just now • ${timeString}`;
+      return `Just now`;
     } else if (minutes < 60) {
-      return `${minutes}m ago • ${timeString}`;
+      return `${minutes}m ago`;
     } else if (hours < 24) {
-      return `${hours}h ago • ${timeString}`;
+      return `${hours}h ago`;
     } else if (days === 1) {
-      return `Yesterday • ${timeString}`;
+      return `Yesterday`;
     } else if (days < 7) {
-      return `${days}d ago • ${timeString}`;
+      return `${days}d ago`;
     } else {
       return date.toLocaleDateString([], { 
         month: 'short', 
         day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+        year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
       });
     }
   };
 
-  const getInquiryIcon = (inquiryType: 'company' | 'slack') => {
-    return inquiryType === 'slack' ? MessageCircle : Building2;
-  };
-
-  const getInquiryLabel = (inquiryType: 'company' | 'slack') => {
-    return inquiryType === 'slack' ? 'Slack Summary' : 'Company Search';
-  };
-
-  const getInquiryColor = (inquiryType: 'company' | 'slack') => {
-    return inquiryType === 'slack' ? 'text-purple-600' : 'text-blue-600';
+  const getFullDateTime = (date: Date) => {
+    return date.toLocaleString([], {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   return (
@@ -61,7 +56,6 @@ const SearchHistory = ({ searchHistory, onSessionClick, isLoading }: SearchHisto
 
       <div className="space-y-3">
         {searchHistory.map((item) => {
-          const InquiryIcon = getInquiryIcon(item.inquiryType);
           return (
             <div key={item.id} className="group">
               <button
@@ -72,12 +66,9 @@ const SearchHistory = ({ searchHistory, onSessionClick, isLoading }: SearchHisto
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2 mb-2">
-                      <InquiryIcon className={`w-4 h-4 flex-shrink-0 ${getInquiryColor(item.inquiryType)}`} />
+                      <Search className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
                       <span className="text-sm font-medium text-foreground truncate">
                         {item.title}
-                      </span>
-                      <span className={`text-xs px-2 py-1 rounded-full bg-muted/50 ${getInquiryColor(item.inquiryType)} font-medium`}>
-                        {getInquiryLabel(item.inquiryType)}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
@@ -87,10 +78,9 @@ const SearchHistory = ({ searchHistory, onSessionClick, isLoading }: SearchHisto
                           {formatDateTime(item.timestamp)}
                         </span>
                       </div>
-                      <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-                        <MessageSquare className="w-3 h-3" />
-                        <span>{item.questionCount} question{item.questionCount !== 1 ? 's' : ''}</span>
-                      </div>
+                      <span className="text-xs text-muted-foreground" title={getFullDateTime(item.timestamp)}>
+                        {item.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
                     </div>
                   </div>
                 </div>
