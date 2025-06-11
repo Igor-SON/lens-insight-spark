@@ -18,11 +18,11 @@ const HelpfulLinks = ({ links }: HelpfulLinksProps) => {
       case 'planhat':
         return 'bg-primary-50 text-primary-700 border-primary-200 hover:bg-primary-100';
       case 'hubspot':
-        return 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100';
+        return 'bg-warning-50 text-warning-700 border-warning-200 hover:bg-warning-100';
       case 'intercom':
-        return 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100';
+        return 'bg-info-50 text-info-700 border-info-200 hover:bg-info-100';
       case 'slack':
-        return 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100';
+        return 'bg-magic-50 text-magic-700 border-magic-200 hover:bg-magic-100';
       default:
         return 'bg-muted text-muted-foreground border-border hover:bg-accent';
     }
@@ -32,31 +32,25 @@ const HelpfulLinks = ({ links }: HelpfulLinksProps) => {
     switch (platform.toLowerCase()) {
       case 'planhat':
         return (
-          <img 
-            src="/lovable-uploads/830e22fb-4a1e-4151-a579-5d61cf3d93a7.png" 
-            alt="Planhat" 
-            className="w-4 h-4"
-          />
+          <div className="w-4 h-4 bg-primary-600 rounded-sm flex items-center justify-center">
+            <span className="text-white text-xs font-bold">P</span>
+          </div>
         );
       case 'hubspot':
         return (
-          <img 
-            src="/lovable-uploads/c7eb2c01-09ab-4281-a17a-a00179b49c88.png" 
-            alt="HubSpot" 
-            className="w-4 h-4"
-          />
+          <div className="w-4 h-4 bg-warning-600 rounded-sm flex items-center justify-center">
+            <span className="text-white text-xs font-bold">H</span>
+          </div>
         );
       case 'intercom':
         return (
-          <img 
-            src="/lovable-uploads/22259bae-b393-4186-811c-0c849a571d53.png" 
-            alt="Intercom" 
-            className="w-4 h-4"
-          />
+          <div className="w-4 h-4 bg-info-600 rounded-sm flex items-center justify-center">
+            <span className="text-white text-xs font-bold">I</span>
+          </div>
         );
       case 'slack':
         return (
-          <div className="w-4 h-4 bg-purple-600 rounded-sm flex items-center justify-center">
+          <div className="w-4 h-4 bg-magic-600 rounded-sm flex items-center justify-center">
             <span className="text-white text-xs font-bold">S</span>
           </div>
         );
