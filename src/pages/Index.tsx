@@ -4,6 +4,7 @@ import Navigation from '../components/Navigation';
 import SearchInput from '../components/SearchInput';
 import ResponseDisplay from '../components/ResponseDisplay';
 import ChatHistory from '../components/ChatHistory';
+import CommonQuestions from '../components/CommonQuestions';
 import { Switch } from '../components/ui/switch';
 
 export interface ConversationItem {
@@ -107,6 +108,15 @@ const Index = () => {
               isSlackSummary={isSlackSummary}
             />
           </div>
+
+          {/* Common Questions - Only show when no conversation history */}
+          {conversation.length === 0 && !isLoading && (
+            <CommonQuestions 
+              onQuestionClick={handleSearch}
+              isLoading={isLoading}
+              isSlackSummary={isSlackSummary}
+            />
+          )}
 
           {/* Current Response */}
           {isLoading && (
