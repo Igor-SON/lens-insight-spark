@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { SearchHistoryItem } from '../pages/Index';
-import { Clock, Search, MessageSquare } from 'lucide-react';
+import { Clock, Search, MessageSquare, Building2, MessageCircle } from 'lucide-react';
 
 interface SearchHistoryProps {
   searchHistory: SearchHistoryItem[];
@@ -39,6 +39,18 @@ const SearchHistory = ({ searchHistory, onSessionClick, isLoading }: SearchHisto
     }
   };
 
+  const getInquiryIcon = (inquiryType: 'company' | 'slack') => {
+    return inquiryType === 'slack' ? MessageCircle : Building2;
+  };
+
+  const getInquiryLabel = (inquiryType: 'company' | 'slack') => {
+    return inquiryType === 'slack' ? 'Slack Summary' : 'Company Search';
+  };
+
+  const getInquiryColor = (inquiryType: 'company' | 'slack') => {
+    return inquiryType === 'slack' ? 'text-purple-600' : 'text-blue-600';
+  };
+
   return (
     <div className="bg-card/60 backdrop-blur-sm rounded-2xl border border-border p-6">
       <div className="flex items-center space-x-3 mb-6">
@@ -48,38 +60,44 @@ const SearchHistory = ({ searchHistory, onSessionClick, isLoading }: SearchHisto
       </div>
 
       <div className="space-y-3">
-        {searchHistory.map((item) => (
-          <div key={item.id} className="group">
-            <button
-              onClick={() => onSessionClick(item.id, item.firstQuestion)}
-              disabled={isLoading}
-              className="w-full text-left p-4 rounded-xl bg-muted/30 hover:bg-muted/50 border border-transparent hover:border-border transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <span className="text-sm font-medium text-foreground truncate">
-                      {item.title}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Clock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                      <span className="text-xs text-muted-foreground">
-                        {formatDateTime(item.timestamp)}
+        {searchHistory.map((item) => {
+          const InquiryIcon = getInquiryIcon(item.inquiryType);
+          return (
+            <div key={item.id} className="group">
+              <button
+                onClick={() => onSessionClick(item.id, item.firstQuestion)}
+                disabled={isLoading}
+                className="w-full text-left p-4 rounded-xl bg-muted/30 hover:bg-muted/50 border border-transparent hover:border-border transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <InquiryIcon className={`w-4 h-4 flex-shrink-0 ${getInquiryColor(item.inquiryType)}`} />
+                      <span className="text-sm font-medium text-foreground truncate">
+                        {item.title}
+                      </span>
+                      <span className={`text-xs px-2 py-1 rounded-full bg-muted/50 ${getInquiryColor(item.inquiryType)} font-medium`}>
+                        {getInquiryLabel(item.inquiryType)}
                       </span>
                     </div>
-                    <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-                      <MessageSquare className="w-3 h-3" />
-                      <span>{item.questionCount} question{item.questionCount !== 1 ? 's' : ''}</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Clock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                        <span className="text-xs text-muted-foreground">
+                          {formatDateTime(item.timestamp)}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-1 text-xs text-muted-foreground">
+                        <MessageSquare className="w-3 h-3" />
+                        <span>{item.questionCount} question{item.questionCount !== 1 ? 's' : ''}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </button>
-          </div>
-        ))}
+              </button>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

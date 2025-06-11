@@ -25,6 +25,7 @@ export interface SearchHistoryItem {
   firstQuestion: string;
   questionCount: number;
   timestamp: Date;
+  inquiryType: 'company' | 'slack';
 }
 
 const Index = () => {
@@ -47,7 +48,8 @@ const Index = () => {
       try {
         const parsedHistory = JSON.parse(savedHistory).map((item: any) => ({
           ...item,
-          timestamp: new Date(item.timestamp)
+          timestamp: new Date(item.timestamp),
+          inquiryType: item.inquiryType || 'company' // Default to company for backward compatibility
         }));
         setSearchHistory(parsedHistory);
       } catch (error) {
@@ -89,7 +91,8 @@ const Index = () => {
           title: question.length > 50 ? question.substring(0, 50) + '...' : question,
           firstQuestion: question,
           questionCount: 1,
-          timestamp: new Date()
+          timestamp: new Date(),
+          inquiryType: isSlackSummary ? 'slack' : 'company'
         };
         return [newSession, ...prev];
       }
